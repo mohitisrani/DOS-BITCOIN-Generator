@@ -4,10 +4,11 @@ defmodule Bitcoin do
   """
 
   def main(ufid,k) do
-    ""
-    |>list(2)
-    |> hash(ufid,k)
-    |> complete
+    %Bitcoin.List{ k: k ,k_init: k, ufid: ufid, coins: ["0"] }
+    |>zeros
+    |>elements
+    |>list
+ #   |> complete
   end
 
   def complete(_trash) do
@@ -15,41 +16,50 @@ defmodule Bitcoin do
     "search complete--"
   end
 
-  def hash(list,ufid,k) do
-    zero= zeros(k)
-    for x <- list do
+  def hash(%Bitcoin.List{ ufid: ufid , k_init: k, zero: zero, x: x}) do
       input = ufid<>";"<>x
       sha=
         :crypto.hash(:sha256,input) |> Base.encode16 |> String.downcase   
-      if zero == String.slice(sha,0,k) do
+      if zero == String.slice(sha, 0, k) do
         IO.puts(input<>" "<>sha)
       end
-    end
+      x
   end
 
-  def zeros(k) do
-    case k do
-      1 -> "0"
-      _ -> "0"<>zeros(k-1)
+  def zeros(%Bitcoin.List{ k: k} = list) do
+    zero=
+      case k do
+        1 -> 
+          "0"          
+        _ ->          
+          %Bitcoin.List{ zero: zero } = zeros(%Bitcoin.List{ k: k-1 })
+          zero<>"0"
     end
+
+    %Bitcoin.List{ list | zero: zero}
   end
 
-  def list(init_list,len) do
-    case len do
-      1     -> elements()
-      _else ->
-        for x <- list(init_list,len-1) , y <- elements() do
-          x<>y
-        end
-    end
+  def list(%Bitcoin.List{ coins: coins, elements: elements} = list) do
+    
+    coins_new=
+      for x <- coins, y <-elements do
+        hash(%Bitcoin.List{ list | x: x<>y})
+      end
+    
+    list(%Bitcoin.List{ list | coins: coins_new})
+    
   end
 
-  def elements do
-    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    |> String.downcase() 
-    |> String.split("", trim: true)
+  def elements(%Bitcoin.List{} = list) do
+    elements=
+      "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      |> String.downcase() 
+      |> String.split("", trim: true)
+    
+      %Bitcoin.List{ list | elements: elements}
 #    |> Enum.with_index
   end
+  
 
 
 end
