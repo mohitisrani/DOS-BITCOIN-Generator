@@ -27,16 +27,7 @@ defmodule Bitcoin do
   end
 
   def zeros(%Bitcoin.List{ k: k} = list) do
-    zero=
-      case k do
-        1 -> 
-          "0"          
-        _ ->          
-          %Bitcoin.List{ zero: zero } = zeros(%Bitcoin.List{ k: k-1 })
-          zero<>"0"
-    end
-
-    %Bitcoin.List{ list | zero: zero}
+    %Bitcoin.List{ list | zero: :binary.copy("0", k)}
   end
 
   def list(%Bitcoin.List{ coins: coins, elements: elements} = list) do
