@@ -1,5 +1,12 @@
 defmodule Bitcoin.List do
     
-    defstruct elements: nil , zero: nil, k_init: nil, k: nil, ufid: nil, coins: nil, x: nil, length: nil 
+    defstruct server_elements: nil,
+              client_elements: nil,
+              elements: nil ,
+              zero: nil, 
+              k: nil, 
+              ufid: nil, 
+              coins: nil, 
+              x: nil 
 
 end
