@@ -1,4 +1,4 @@
-defmodule Bitcoin.List do
+defmodule Bitcoin.Box do
     
     defstruct server_elements: nil,
               client_elements: nil,
@@ -7,6 +7,8 @@ defmodule Bitcoin.List do
               k: nil, 
               ufid: nil, 
               coins: nil, 
-              x: nil 
+              x: nil,
+              serv_add: nil,
+              self_state: nil
 
 end
