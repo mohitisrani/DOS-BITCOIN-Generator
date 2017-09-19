@@ -2,7 +2,7 @@ defmodule Bitcoin.Client do
   use GenServer
   alias Bitcoin.Server
 
-  def client(sip \\ "192.168.0.105") do
+  def main(sip \\ "192.168.0.105") do
     System.cmd("epmd", ["-daemon"])
     Bitcoin.get_ip()
     |> start_client(sip)
@@ -24,9 +24,7 @@ defmodule Bitcoin.Client do
       |>String.to_atom
     Node.connect(server_name)
     Node.spawn_link(server_name, Server, :client_main, [client_name])
-    "starting"
+    IO.puts "Client #{inspect client_name} is now working for Server #{inspect server_name}."
+    Process.sleep(:infinity)
   end
-
-
-
 end

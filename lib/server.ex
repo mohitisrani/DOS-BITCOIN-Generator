@@ -2,9 +2,12 @@ defmodule Bitcoin.Server do
   use GenServer
   alias Bitcoin.Box
   
-  def server(k \\ 1) do
+  def main(k \\ 1) do
     System.cmd("epmd", ["-daemon"])
-    Bitcoin.get_ip()
+    sip = Bitcoin.get_ip()
+    IO.puts("Server started as : master@#{sip}")
+    Process.sleep(1500)
+    sip
     |> start_server
     |>server_main(k)
   end 
@@ -12,8 +15,8 @@ defmodule Bitcoin.Server do
   def start_server(ip) do
     serv_add = 
       "master@#{ip}"
-      |>String.to_atom
-    Node.start(serv_add)
+      |>String.to_atom  
+      Node.start(serv_add)
     Node.set_cookie(:"mohit")
     serv_add
   end
@@ -27,8 +30,9 @@ defmodule Bitcoin.Server do
 
   def create_server( list ) do
     {:ok, pid} = GenServer.start_link(Bitcoin.Server, list, name: MyServer)
-    # :global.sync()
-    # :global.register_name(:server, pid)
+    :global.sync()
+    :global.register_name(:server, pid)
+    Process.sleep(:infinity)
   end
 
   def init( list ) do 
@@ -40,7 +44,7 @@ defmodule Bitcoin.Server do
   end
 
   def handle_cast({:bitcoins_client, to_print}, state) do
-    Bitcoin.print(to_print)
+    IO.puts("#{to_print}")
     {:noreply, state}
   end
 
@@ -57,9 +61,5 @@ defmodule Bitcoin.Server do
       end
     Node.spawn_link(client_name,Bitcoin, :master, [ %Box{ list |self_state: :client, x: client_list } ])
   end  
-
-  # def client_bitcoins(to_print) do
-  #   GenServer.cast(MyServer, {:bitcoins_client, to_print})
-  # end
   
 end

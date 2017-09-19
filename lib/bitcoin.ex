@@ -2,6 +2,16 @@ defmodule Bitcoin do
   use GenServer
   alias Bitcoin.Box
 
+  def main(args \\ ["4"]) do
+    [arg] = args
+    case String.contains?(arg, ".") do
+      true -> Bitcoin.Client.main(arg)
+      false -> 
+        {k,_} = Integer.parse(arg)
+        Bitcoin.Server.main(k)
+    end
+  end
+
   def get_ip() do
     {:ok, ifs} = :inet.getif()
     {a,b,c,d} =
@@ -37,38 +47,28 @@ defmodule Bitcoin do
     new_bitcoins = 
       Enum.map(all_search, fn({_a,b}) -> b<>"\n" end )
       |>Enum.filter( fn(b) -> b != "\n" end)
-    Task.start(Bitcoin,:concat, ["", new_bitcoins, list])
+    Task.start(Bitcoin,:pre_printing, ["", [""] ++ new_bitcoins, list])
     num=10000
     mine(%Box{ list | coins: Enum.take_random(coins_new, num)})
   end
 
-  def concat(init_string , [h|t], list) do
+  def pre_printing(init_string, [h|t], list) do
     case t do
       [] -> 
         to_print = init_string<>String.trim_trailing(h)
-        %Box{ serv_add: serv_add, self_state: self_state } = list
+        %Box{ self_state: self_state } = list
         case self_state do
-          :server -> print(to_print)
-          :client -> 
-            case Node.alive? do
-              true -> Node.spawn(serv_add, Bitcoin, :print, [to_print])
-              false -> 
-                Node.connect(serv_add)
-                Node.spawn(serv_add, Bitcoin.Server, :client_bitcoins, [to_print])
-            # :global.sync()
-            # :global.registered_names
-            # pid = :global.whereis_name(:server)
-            #GenServer.cast(pid, {:bitcoins_client, to_print})
-            end
+          :server -> IO.puts("#{to_print}")
+          :client ->
+            :global.sync()
+            :global.registered_names
+            pid = :global.whereis_name(:server)
+            GenServer.cast(pid, {:bitcoins_client, to_print})
         end
        _ ->
         init_string<>h
-        |> concat(t,list)
+        |>pre_printing(t, list)
     end
-  end
-
-  def print(to_print) do
-    IO.puts(to_print)
   end
 
   def start(%Box{ k: k } = list) do  #sets elements list and zero string

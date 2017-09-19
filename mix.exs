@@ -13,7 +13,9 @@ defmodule Bitcoin.Mixfile do
   end
 
   def escript do
-    [main_module: Test]
+    [main_module: Bitcoin, 
+    #embed_elixir: true 
+    ]
   end
 
   # Run "mix help compile.app" to learn about applications.
