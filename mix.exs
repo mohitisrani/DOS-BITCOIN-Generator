@@ -14,7 +14,7 @@ defmodule Bitcoin.Mixfile do
 
   def escript do
     [main_module: Bitcoin, 
-    #embed_elixir: true 
+    embed_elixir: true 
     ]
   end
 
